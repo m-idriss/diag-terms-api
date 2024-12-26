@@ -16,6 +16,7 @@ import java.util.Collections;
 public class TermProducer {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
+
   @Inject
   @Channel("terms-out")
   Emitter<Record<String, String>> emitter;

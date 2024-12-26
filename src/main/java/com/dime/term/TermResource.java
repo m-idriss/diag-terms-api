@@ -30,7 +30,7 @@ public class TermResource {
   HalService halService;
 
   @Inject
-  private TermMapper termMapper;
+  TermMapper termMapper;
 
   @POST
   @Path("/add")
