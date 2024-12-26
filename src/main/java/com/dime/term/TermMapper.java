@@ -13,12 +13,4 @@ public class TermMapper {
     return termRecord;
   }
 
-  public Term toEntity(TermRecord termRecord) {
-    Term term = new Term();
-    term.setId(termRecord.getId());
-    term.setWord(termRecord.getWord());
-    term.setSynonyms(termRecord.getSynonyms());
-    return term;
-  }
-
 }
