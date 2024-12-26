@@ -1,0 +1,25 @@
+#version: '3.9'
+
+services:
+  api:
+    image: dime/diag-terms-api:latest
+    container_name: diag-terms-api
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      PORT: 8080
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/api/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: always
+    networks:
+      - ms-network
+networks:
+  ms-network:
+    name: kafka-network
+    external: true
