@@ -32,14 +32,16 @@ public class TermProducer {
       Log.infof("Term sent to Kafka: %s", termJson);
     } catch (RuntimeException e) {
       Log.error("Failed to send term to Kafka", e);
+    } catch (TermException e) {
+      Log.error("Failed to serialize Term object to JSON", e);
     }
   }
 
-  private String termToJson(Term term) {
+  private String termToJson(Term term) throws TermException {
     try {
       return objectMapper.writeValueAsString(term);
     } catch (JsonProcessingException e) {
-      throw new RuntimeException("Failed to serialize Term object to JSON", e);
+      throw new TermException("Failed to serialize Term object to JSON", e);
     }
   }
 
