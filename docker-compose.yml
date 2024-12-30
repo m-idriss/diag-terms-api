@@ -19,7 +19,12 @@ services:
     restart: always
     networks:
       - ms-network
+    volumes:
+      - api-data:/var/lib/api/data
+
 networks:
   ms-network:
     name: kafka-network
     external: true
+volumes:
+  api-data:
