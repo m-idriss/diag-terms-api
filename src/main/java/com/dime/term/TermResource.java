@@ -29,7 +29,7 @@ public class TermResource {
 
   @RestClient
   @Inject
-  TermServiceClient termServiceClent;
+  TermServiceClient termServiceClient;
 
   @Inject
   HalService halService;
@@ -46,7 +46,7 @@ public class TermResource {
   public HalEntityWrapper<TermRecord> getTermByWord(@PathParam("word") String word) {
     String wordLower = word.toLowerCase();
     try {
-      Optional<TermRecord> termRecord = termServiceClent.getTermByWord(wordLower);
+      Optional<TermRecord> termRecord = termServiceClient.getTermByWord(wordLower);
       return termRecord.map(halService::toHalWrapper).orElseThrow(() -> GenericError.TERM_NOT_FOUND.exWithArguments(Map.of("word", word)));
     } catch (ClientWebApplicationException ex) {
       if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
@@ -67,7 +67,7 @@ public class TermResource {
   @Operation(summary = "Get term by id")
   public HalEntityWrapper<TermRecord> getTermById(@PathParam("id") int id) {
     try {
-      TermRecord termRecord = termServiceClent.getTermById(id).orElseThrow();
+      TermRecord termRecord = termServiceClient.getTermById(id).orElseThrow();
       return halService.toHalWrapper(termRecord);
     } catch (ClientWebApplicationException ex) {
       if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
@@ -85,7 +85,7 @@ public class TermResource {
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @Operation(summary = "List all terms")
   public HalCollectionWrapper<TermRecord> listAllTerms() {
-    List<TermRecord> termRecords = termServiceClent.listAllTerms().orElseThrow();
+    List<TermRecord> termRecords = termServiceClient.listAllTerms().orElseThrow();
     return halService.toHalCollectionWrapper(termRecords, "terms", TermRecord.class);
   }
 
@@ -113,7 +113,7 @@ public class TermResource {
   @Operation(summary = "Delete term by word")
   public Response deleteTerm(String word) {
     String wordLower = word.toLowerCase();
-    termServiceClent.deleteTerm(wordLower);
+    termServiceClient.deleteTerm(wordLower);
     return Response.noContent().build();
   }
 
@@ -125,7 +125,7 @@ public class TermResource {
   @Transactional
   @Operation(summary = "Delete term by id")
   public Response deleteTermById(@PathParam("id") int id) {
-    termServiceClent.deleteTermById(id);
+    termServiceClient.deleteTermById(id);
     return Response.noContent().build();
   }
 
