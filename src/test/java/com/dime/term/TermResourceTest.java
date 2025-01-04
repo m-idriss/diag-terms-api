@@ -20,8 +20,6 @@ class TermResourceTest {
   private static final String TERMS_ENDPOINT = "api/v1/terms";
   private static final String DOMAIN_PATTERN = "http://[^/]+/";
   private static final String TERM_HEALTH = "{\"word\":\"health\",\"synonyms\":[\"synonym-health\"]}";
-  private static final String TERM_TRY = "{\"word\":\"test-TRY\",\"synonyms\":[\"testtry\",\"testtry1\"]}";
-  private static final String TERM_TEST = "{\"word\":\"test-test\",\"synonyms\":[\"testrun\"]}";
 
 
   @Inject

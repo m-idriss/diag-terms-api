@@ -13,8 +13,6 @@ public enum GenericError implements GenericErrorResponse {
   TERM_NOT_FOUND("ID_NOT_FOUND", Status.NOT_FOUND, "Term with id [{id}] not found"),
   TERM_CONFLICTS("ID_CONFLICT", Status.CONFLICT, "Term with id [{id}] make conflict"),
   WORD_NOT_FOUND("WORD_NOT_FOUND", Status.NOT_FOUND, "Term with word [{word}] do not exist"),
-  FAILED_DEPENDENCY("FAILED_DEPENDENCY", Status.INTERNAL_SERVER_ERROR,
-      "Failed during using dependency, [code : {code}]"),
   INTERNAL_SERVER_ERROR("INTERNAL_SERVER_ERROR", Status.INTERNAL_SERVER_ERROR,
       Status.INTERNAL_SERVER_ERROR.getReasonPhrase());
 
