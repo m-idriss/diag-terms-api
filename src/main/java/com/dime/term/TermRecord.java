@@ -11,7 +11,7 @@ import java.util.List;
 public class TermRecord {
 
   @JsonProperty("id")
-  private String id;
+  private Long id;
 
   @JsonProperty("word")
   private String word;

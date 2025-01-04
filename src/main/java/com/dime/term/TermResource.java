@@ -1,69 +1,64 @@
 package com.dime.term;
 
-import io.micrometer.core.annotation.Counted;
+import com.dime.client.TermServiceClient;
+import com.dime.exceptions.GenericError;
 import io.quarkus.hal.HalCollectionWrapper;
 import io.quarkus.hal.HalEntityWrapper;
 import io.quarkus.hal.HalService;
-import io.quarkus.logging.Log;
 import io.quarkus.resteasy.reactive.links.InjectRestLinks;
 import io.quarkus.resteasy.reactive.links.RestLink;
 import io.quarkus.resteasy.reactive.links.RestLinkType;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
+import org.jboss.resteasy.reactive.ClientWebApplicationException;
 import org.jboss.resteasy.reactive.common.util.RestMediaType;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-@Path("api/v1/terms")
+@Path("/api/v1/terms")
 @Tag(name = "Terms", description = "Manage Terms")
-@Produces(MediaType.APPLICATION_JSON)
 public class TermResource {
 
+  @RestClient
   @Inject
-  TermProducer producer;
+  TermServiceClient termServiceClent;
 
   @Inject
   HalService halService;
-
-  @Inject
-  TermMapper termMapper;
-
-  @POST
-  @Path("/add")
-  @Counted(value = "addTerm")
-  @Consumes(MediaType.APPLICATION_JSON)
-  public Response addTerm(Term term) {
-    if (term == null) {
-      return Response.status(Response.Status.BAD_REQUEST).build();
-    }
-    Log.info("Received a new term: " + term.getWord());
-    try {
-      producer.sendToKafka(term);
-      return Response.status(Response.Status.CREATED).entity(term).build();
-    } catch (Exception e) {
-      return Response.status(Response.Status.BAD_REQUEST)
-          .entity("Error storing term: " + e.getMessage())
-          .build();
-    }
-  }
 
   /*
    * curl -X GET http://localhost:8080/api/v1/terms/word
    */
   @GET
-  @Path("{word: [a-zA-Z]+}")
+  @Path("{word: [a-zA-Z-]+}")
   @RestLink(rel = "self-by-word")
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @InjectRestLinks(RestLinkType.INSTANCE)
   @Operation(summary = "Get term by word")
   public HalEntityWrapper<TermRecord> getTermByWord(@PathParam("word") String word) {
-    return null;
+    String wordLower = word.toLowerCase();
+    try {
+      Optional<TermRecord> termRecord = termServiceClent.getTermByWord(wordLower);
+      return termRecord.map(halService::toHalWrapper).orElseThrow(() -> GenericError.TERM_NOT_FOUND.exWithArguments(Map.of("word", word)));
+    } catch (ClientWebApplicationException ex) {
+      if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
+        throw GenericError.TERM_NOT_FOUND.exWithArguments(Map.of("word", word));
+      }
+      throw ex;
+    }
   }
 
+  /*
+   * curl -X GET http://localhost:8080/api/v1/terms/1
+   */
   @GET
   @Path("/{id: \\d+}")
   @RestLink(rel = "self")
@@ -71,23 +66,67 @@ public class TermResource {
   @InjectRestLinks(RestLinkType.INSTANCE)
   @Operation(summary = "Get term by id")
   public HalEntityWrapper<TermRecord> getTermById(@PathParam("id") int id) {
-    return null;
+    try {
+      TermRecord termRecord = termServiceClent.getTermById(id).orElseThrow();
+      return halService.toHalWrapper(termRecord);
+    } catch (ClientWebApplicationException ex) {
+      if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
+        throw GenericError.TERM_NOT_FOUND.exWithArguments(Map.of("id", id));
+      }
+      throw ex;
+    }
   }
 
+  /*
+   * curl -X GET http://localhost:8080/api/v1/terms
+   */
   @GET
-  @Path("all")
-  @Counted(value = "getAllTerms")
-  public Response getAll() {
-    return Response.ok(producer.getAllTerms()).build();
-  }
-
-  @GET
+  @RestLink(rel = "list")
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @Operation(summary = "List all terms")
   public HalCollectionWrapper<TermRecord> listAllTerms() {
-    List<Term> terms = producer.getAllTerms().stream().toList();
-    List<TermRecord> termRecords = terms.stream().map(termMapper::toRecord).toList();
+    List<TermRecord> termRecords = termServiceClent.listAllTerms().orElseThrow();
     return halService.toHalCollectionWrapper(termRecords, "terms", TermRecord.class);
+  }
+
+  /*
+   * curl -X POST http://localhost:8080/api/v1/terms -H 'Content-Type: application/json' -d '{"word":"example"}'
+   */
+  @POST
+  @Path("/")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
+  @Transactional
+  @Operation(summary = "Create term")
+  public Response createTerm(TermRecord termRecord) {
+    TermRecord termRecordSaved = termServiceClent.createTerm(termRecord).orElseThrow();
+    return Response.status(Response.Status.CREATED).entity(halService.toHalWrapper(termRecordSaved)).build();
+  }
+
+
+  /*
+   * curl -X DELETE http://localhost:8080/api/v1/terms/word
+   */
+  @DELETE
+  @Path("/{word}")
+  @Transactional
+  @Operation(summary = "Delete term by word")
+  public Response deleteTerm(String word) {
+    String wordLower = word.toLowerCase();
+    termServiceClent.deleteTerm(wordLower);
+    return Response.noContent().build();
+  }
+
+  /*
+   * curl -X DELETE http://localhost:8080/api/v1/terms/1
+   */
+  @DELETE
+  @Path("/{id: \\d+}")
+  @Transactional
+  @Operation(summary = "Delete term by id")
+  public Response deleteTermById(@PathParam("id") int id) {
+    termServiceClent.deleteTermById(id);
+    return Response.noContent().build();
   }
 
 }
