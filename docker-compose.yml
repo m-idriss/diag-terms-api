@@ -14,7 +14,7 @@ services:
       PORT: 8081
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/api/health" ]
-      interval: 30s
+      interval: 300s
       timeout: 10s
       retries: 5
     restart: always
