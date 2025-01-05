@@ -1,6 +1,6 @@
 package com.dime.client;
 
-import com.dime.term.TermRecord;
+import com.dime.model.TermRecord;
 import io.quarkus.logging.Log;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.enterprise.context.ApplicationScoped;

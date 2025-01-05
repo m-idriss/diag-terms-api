@@ -1,6 +1,7 @@
 package com.dime.term;
 
 import com.dime.exceptions.GenericError;
+import com.dime.model.TermRecord;
 import io.quarkus.hal.HalCollectionWrapper;
 import io.quarkus.hal.HalEntityWrapper;
 import io.quarkus.hal.HalService;

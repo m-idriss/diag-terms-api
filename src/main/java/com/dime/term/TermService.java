@@ -1,6 +1,7 @@
 package com.dime.term;
 
 import com.dime.client.TermServiceClient;
+import com.dime.model.TermRecord;
 import com.dime.wordsapi.WordsApiService;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;

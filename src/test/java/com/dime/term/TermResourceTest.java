@@ -1,6 +1,7 @@
 package com.dime.term;
 
 import com.dime.client.TermServiceClient;
+import com.dime.model.TermRecord;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
