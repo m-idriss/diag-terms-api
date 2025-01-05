@@ -1,9 +1,12 @@
 package com.dime.client;
 
 import com.dime.term.TermRecord;
+import io.quarkus.logging.Log;
+import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import java.util.List;
@@ -40,4 +43,13 @@ public interface TermServiceClient {
   @DELETE
   @Path("/{id}")
   void deleteTermById(@PathParam("id") int id);
+
+  @ClientExceptionMapper
+  static RuntimeException toException(Response response) {
+    if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
+      Log.warn("Term not found in term-service");
+      return null;
+    }
+    return new RuntimeException("Failed to call term-service: " + response.getStatus());
+  }
 }

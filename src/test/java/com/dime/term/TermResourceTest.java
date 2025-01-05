@@ -6,7 +6,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatchers;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,8 +18,6 @@ import static org.mockito.Mockito.when;
 class TermResourceTest {
   private static final String TERMS_ENDPOINT = "api/v1/terms";
   private static final String DOMAIN_PATTERN = "http://[^/]+/";
-  private static final String TERM_HEALTH = "{\"word\":\"health\",\"synonyms\":[\"synonym-health\"]}";
-
 
   @Inject
   @InjectMock
@@ -115,27 +112,4 @@ class TermResourceTest {
         .then()
         .statusCode(204);
   }
-
-  @Test
-  void createTerm() {
-    when(termServiceClient.createTerm(ArgumentMatchers.any(TermRecord.class))).thenReturn(Optional.of(getTestTermRecord("health")));
-
-    given()
-        .body(TERM_HEALTH)
-        .header("Content-Type", "application/json")
-        .when().post("/api/v1/terms")
-        .then()
-        .statusCode(201)
-        .body("word", equalTo("health"))
-        .body("id", equalTo(6))
-        .body("synonyms", hasItem("synonym-health"))
-        .body("_links", allOf(
-            hasKey("self-by-word"),
-            hasKey("self"),
-            hasKey("list")))
-        .body("_links.self-by-word.href", matchesPattern(DOMAIN_PATTERN + TERMS_ENDPOINT + "/health"))
-        .body("_links.self.href", matchesPattern(DOMAIN_PATTERN + TERMS_ENDPOINT + "/" + "health".length()))
-        .body("_links.list.href", matchesPattern(DOMAIN_PATTERN + TERMS_ENDPOINT));
-  }
-
 }
