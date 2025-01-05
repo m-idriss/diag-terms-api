@@ -40,7 +40,7 @@ class StaticContentTest {
   void testIndexHtmlContainsLogoSmall() throws IOException {
     try (InputStream in = url.openStream()) {
       String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-      Assertions.assertTrue(contents.contains(String.format("\".%s\" alt=\"logo\"", smallLogoUrl.getFile())));
+      Assertions.assertTrue(contents.contains(String.format("<a href=\".\"><img alt=\"logo\" class=\"img-fluid\" src=\".%s\"/></a>", smallLogoUrl.getFile())));
     }
   }
 
