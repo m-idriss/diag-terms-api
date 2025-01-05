@@ -9,9 +9,6 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.reactive.messaging.Emitter;
 
-import java.util.Collection;
-import java.util.Collections;
-
 @ApplicationScoped
 public class TermProducer {
 
@@ -45,7 +42,4 @@ public class TermProducer {
     }
   }
 
-  public Collection<Term> getAllTerms() {
-    return Collections.emptyList();
-  }
 }
