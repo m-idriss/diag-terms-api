@@ -18,15 +18,6 @@ import java.util.Map;
 @RegisterRestClient(configKey = "wordsapi")
 public interface WordsApiService {
 
-  @ClientExceptionMapper
-  static RuntimeException toException(Response response) {
-    Log.warn("Error response from wordsapi: " + response.getStatusInfo().getReasonPhrase());
-    if (response.getStatus() == 404) {
-      return GenericError.WORD_NOT_FOUND.exWithArguments(null);
-    }
-    return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus()));
-  }
-
   @GET
   @Path("{word}/synonyms")
   @Produces(MediaType.APPLICATION_JSON)
@@ -37,5 +28,14 @@ public interface WordsApiService {
   @Path("/health/synonyms")
   @Produces(MediaType.APPLICATION_JSON)
   String healthApi();
+
+  @ClientExceptionMapper
+  static RuntimeException toException(Response response) {
+    Log.warn("Error response from wordsapi: " + response.getStatusInfo().getReasonPhrase());
+    if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
+      return GenericError.WORD_NOT_FOUND.exWithArguments(null);
+    }
+    return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus()));
+  }
 
 }
