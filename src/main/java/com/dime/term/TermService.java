@@ -5,6 +5,7 @@ import com.dime.wordsapi.WordsApiService;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.List;
@@ -24,7 +25,13 @@ public class TermService {
   @Inject
   private WordsApiService wordsApiService;
 
-  /*
+  @ConfigProperty(name = "term-service.max-retries")
+  private int maxRetries;
+
+  @ConfigProperty(name = "term-service.retry-interval-millis")
+  private long retryIntervalMillis;
+
+  /**
    * This method returns the term by its word. If the term is not found in the
    * termServiceClient, it retrieves the term from the wordsApiService and sends
    * it to the termProducer to be persisted in the database.
@@ -34,8 +41,6 @@ public class TermService {
    * Optional.
    */
   public Optional<TermRecord> getTermByWord(String word) {
-    int maxRetries = 5;
-    int retryIntervalMillis = 100;
 
     // Retry loop for retrieving TermRecord
     for (int retry = 0; retry < maxRetries; retry++) {
@@ -77,28 +82,28 @@ public class TermService {
     return Optional.empty();
   }
 
-  /*
-   * This method returns the term by its id.
+  /**
+   * This method retrieves a term from the termServiceClient by its id.
    */
   public Optional<TermRecord> getTermById(int id) {
     return termServiceClient.getTermById(id);
   }
 
-  /*
+  /**
    * This method returns a list of all terms persisted in the database.
    */
   public Optional<List<TermRecord>> listAllTerms() {
     return termServiceClient.listAllTerms();
   }
 
-  /*
+  /**
    * This method deletes a term from the database by its word.
    */
   public void deleteTerm(String word) {
     termServiceClient.deleteTerm(word);
   }
 
-  /*
+  /**
    * This method deletes a term from the database by its id.
    */
   public void deleteTermById(int id) {
