@@ -50,7 +50,7 @@ public interface TermServiceClient {
   static RuntimeException toException(Response response) {
     if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
       Log.warn("Term not found in term-service");
-      return null;
+      return new NotFoundException("Term not found in term-service");
     }
     return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus()));
   }

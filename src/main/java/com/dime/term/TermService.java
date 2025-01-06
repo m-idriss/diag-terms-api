@@ -6,6 +6,7 @@ import com.dime.wordsapi.WordsApiService;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -53,6 +54,8 @@ public class TermService {
           Log.info("Term found in termServiceClient for word: [" + word + "]");
           return term;
         }
+      } catch (NotFoundException e) {
+        Log.info("Term not found for word: [" + word + "]");
       } catch (RuntimeException e) {
         Log.warn("Error retrieving term from termServiceClient", e);
       }
@@ -87,6 +90,7 @@ public class TermService {
    * This method retrieves a term from the termServiceClient by its id.
    */
   public Optional<TermRecord> getTermById(int id) {
+    Log.info("Retrieving term from database by id: [" + id + "]");
     return termServiceClient.getTermById(id);
   }
 
@@ -94,6 +98,7 @@ public class TermService {
    * This method returns a list of all terms persisted in the database.
    */
   public Optional<List<TermRecord>> listAllTerms() {
+    Log.info("Retrieving all terms from database");
     return termServiceClient.listAllTerms();
   }
 
@@ -101,6 +106,7 @@ public class TermService {
    * This method deletes a term from the database by its word.
    */
   public void deleteTerm(String word) {
+    Log.info("Deleting term from database by word: [" + word + "]");
     termServiceClient.deleteTerm(word);
   }
 
@@ -108,6 +114,7 @@ public class TermService {
    * This method deletes a term from the database by its id.
    */
   public void deleteTermById(int id) {
+    Log.info("Deleting term from database by id: [" + id + "]");
     termServiceClient.deleteTermById(id);
   }
 }
