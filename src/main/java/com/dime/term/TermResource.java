@@ -20,7 +20,6 @@ import org.jboss.resteasy.reactive.common.util.RestMediaType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Path("/api/v1/terms")
 @Tag(name = "Terms", description = "Manage Terms")
@@ -41,11 +40,12 @@ public class TermResource {
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @InjectRestLinks(RestLinkType.INSTANCE)
   @Operation(summary = "Get term by word")
-  public HalEntityWrapper<TermRecord> getTermByWord(@PathParam("word") String word) {
+  public HalEntityWrapper<TermResponse> getTermByWord(@PathParam("word") String word) {
     String wordLower = word.toLowerCase();
     try {
-      Optional<TermRecord> termRecord = termService.getTermByWord(wordLower);
-      return termRecord.map(halService::toHalWrapper).orElseThrow(() -> GenericError.WORD_NOT_FOUND.exWithArguments(Map.of("word", word)));
+      TermRecord termRecord = termService.getTermByWord(wordLower).orElseThrow(() -> GenericError.WORD_NOT_FOUND.exWithArguments(Map.of("word", word)));
+      TermResponse termResponse = TermApiMapper.INSTANCE.toResponse(termRecord);
+      return halService.toHalWrapper(termResponse);
     } catch (ClientWebApplicationException ex) {
       if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
         throw GenericError.WORD_NOT_FOUND.exWithArguments(Map.of("word", word));
@@ -63,10 +63,11 @@ public class TermResource {
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @InjectRestLinks(RestLinkType.INSTANCE)
   @Operation(summary = "Get term by id")
-  public HalEntityWrapper<TermRecord> getTermById(@PathParam("id") int id) {
+  public HalEntityWrapper<TermResponse> getTermById(@PathParam("id") int id) {
     try {
       TermRecord termRecord = termService.getTermById(id).orElseThrow();
-      return halService.toHalWrapper(termRecord);
+      TermResponse termResponse = TermApiMapper.INSTANCE.toResponse(termRecord);
+      return halService.toHalWrapper(termResponse);
     } catch (ClientWebApplicationException ex) {
       if (ex.getResponse().getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
         throw GenericError.TERM_NOT_FOUND.exWithArguments(Map.of("id", id));
@@ -82,9 +83,10 @@ public class TermResource {
   @RestLink(rel = "list")
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @Operation(summary = "List all terms")
-  public HalCollectionWrapper<TermRecord> listAllTerms() {
+  public HalCollectionWrapper<TermResponse> listAllTerms() {
     List<TermRecord> termRecords = termService.listAllTerms().orElseThrow();
-    return halService.toHalCollectionWrapper(termRecords, "terms", TermRecord.class);
+    List<TermResponse> termResponses = TermApiMapper.INSTANCE.toResponses(termRecords);
+    return halService.toHalCollectionWrapper(termResponses, "terms", TermResponse.class);
   }
 
   /*

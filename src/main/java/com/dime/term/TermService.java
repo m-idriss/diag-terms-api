@@ -63,13 +63,13 @@ public class TermService {
       Log.warn("Term not found in termServiceClient for word: [" + word + "]");
       // If the term isn't found on the first attempt, retrieve it from the API
       if (retry == 0) {
-        Term termFromApi = wordsApiService.findByWord(word);
-        if (termFromApi == null) {
+        TermApi termApi = wordsApiService.findByWord(word);
+        if (termApi == null) {
           Log.warn("Error: Term not found in wordsApiService for word: [" + word + "]");
           return Optional.empty();
         }
-
-        termProducer.sendToKafka(termFromApi);
+        TermRecord termRecord = TermApiMapper.INSTANCE.toRecord(termApi);
+        termProducer.sendToKafka(word, termRecord);
       }
 
       // Wait before the next retry

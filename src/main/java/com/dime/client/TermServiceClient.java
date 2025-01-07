@@ -52,6 +52,6 @@ public interface TermServiceClient {
       Log.warn("Term not found in term-service");
       return new NotFoundException("Term not found in term-service");
     }
-    return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus()));
+    return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus(), "message", response.readEntity(String.class)));
   }
 }

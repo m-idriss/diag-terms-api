@@ -1,6 +1,7 @@
 package com.dime.term;
 
 import com.dime.exceptions.TermException;
+import com.dime.model.TermRecord;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.logging.Log;
@@ -19,27 +20,33 @@ public class TermProducer {
   @Channel("terms-out")
   Emitter<Record<String, String>> emitter;
 
-  public void sendToKafka(Term term) {
-    if (term == null || term.getWord() == null) {
+  /**
+   * This method sends a termRecord to the Kafka topic.
+   */
+  public void sendToKafka(String word, TermRecord termRecord) {
+    if (termRecord == null || termRecord.getWord() == null) {
       throw new IllegalArgumentException("Term or its properties cannot be null");
     }
     try {
-      String termJson = termToJson(term);
-      Log.infof("Sending term to Kafka: %s", termJson);
-      emitter.send(Record.of(term.getWord(), termJson));
+      String termJson = termToJson(termRecord);
+      Log.infof("Sending termRecord to Kafka: %s", termJson);
+      emitter.send(Record.of(word, termJson));
       Log.infof("Term sent to Kafka: %s", termJson);
     } catch (RuntimeException e) {
-      Log.error("Failed to send term to Kafka", e);
+      Log.error("Failed to send termRecord to Kafka", e);
     } catch (TermException e) {
       Log.error("Failed to serialize Term object to JSON", e);
     }
   }
 
-  private String termToJson(Term term) throws TermException {
+  /**
+   * This method serializes a Term object to JSON.
+   */
+  private String termToJson(TermRecord termRecord) throws TermException {
     try {
-      return objectMapper.writeValueAsString(term);
+      return objectMapper.writeValueAsString(termRecord);
     } catch (JsonProcessingException e) {
-      throw new TermException("Failed to serialize Term object to JSON", e);
+      throw new TermException("Failed to serialize TermRecord object to JSON", e);
     }
   }
 

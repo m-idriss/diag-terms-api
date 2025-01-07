@@ -1,7 +1,7 @@
 package com.dime.wordsapi;
 
 import com.dime.exceptions.GenericError;
-import com.dime.term.Term;
+import com.dime.term.TermApi;
 import io.quarkus.logging.Log;
 import io.quarkus.rest.client.reactive.ClientExceptionMapper;
 import jakarta.ws.rs.GET;
@@ -21,7 +21,7 @@ public interface WordsApiService {
   @GET
   @Path("{word}/synonyms")
   @Produces(MediaType.APPLICATION_JSON)
-  Term findByWord(@PathParam("word") String word);
+  TermApi findByWord(@PathParam("word") String word);
 
   // implement health check for api @Path("words/health")
   @GET

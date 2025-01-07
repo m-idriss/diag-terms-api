@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
-class TermResourceTest {
+class TermApiResourceTest {
   private static final String TERMS_ENDPOINT = "api/v1/terms";
   private static final String DOMAIN_PATTERN = "http://[^/]+/";
 
