@@ -17,7 +17,7 @@ public class TermProducer {
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   @Inject
-  @Channel("terms-out")
+  @Channel("terms-feed")
   Emitter<Record<String, String>> emitter;
 
   /**

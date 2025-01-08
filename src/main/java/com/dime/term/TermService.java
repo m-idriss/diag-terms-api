@@ -2,7 +2,6 @@ package com.dime.term;
 
 import com.dime.client.TermServiceClient;
 import com.dime.model.TermRecord;
-import com.dime.wordsapi.WordsApiService;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,10 +21,6 @@ public class TermService {
 
   @Inject
   private TermProducer termProducer;
-
-  @RestClient
-  @Inject
-  private WordsApiService wordsApiService;
 
   @ConfigProperty(name = "term-service.max-retries")
   private int maxRetries;
@@ -63,12 +58,8 @@ public class TermService {
       Log.warn("Term not found in termServiceClient for word: [" + word + "]");
       // If the term isn't found on the first attempt, retrieve it from the API
       if (retry == 0) {
-        TermApi termApi = wordsApiService.findByWord(word);
-        if (termApi == null) {
-          Log.warn("Error: Term not found in wordsApiService for word: [" + word + "]");
-          return Optional.empty();
-        }
-        TermRecord termRecord = TermApiMapper.INSTANCE.toRecord(termApi);
+        TermRecord termRecord = new TermRecord();
+        termRecord.setWord(word);
         termProducer.sendToKafka(word, termRecord);
       }
 

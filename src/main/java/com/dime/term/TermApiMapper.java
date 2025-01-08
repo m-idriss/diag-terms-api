@@ -14,13 +14,11 @@ public interface TermApiMapper {
   @Mapping(target = "word", source = "word", qualifiedByName = "lowercase")
   TermResponse toResponse(TermRecord termRecord);
 
+  List<TermResponse> toResponses(List<TermRecord> termRecords);
+
   @Named("lowercase")
   default String lowercase(String word) {
     return word.toLowerCase();
   }
 
-  List<TermResponse> toResponses(List<TermRecord> termRecords);
-
-  @Mapping(target = "word", source = "word", qualifiedByName = "lowercase")
-  TermRecord toRecord(TermApi termApi);
 }
