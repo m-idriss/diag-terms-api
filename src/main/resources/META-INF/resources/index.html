@@ -5,7 +5,8 @@
     <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet"/>
-    <title>Terms API demo</title>
+    <title>Terms API Demo</title>
+    <link href="styles.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-4">
@@ -14,26 +15,35 @@
             <div class="text-center mb-4">
                 <a href="."><img alt="logo" class="img-fluid" src="./3dime-logo-blue-small.png"/></a>
             </div>
+
+            <!-- Input Section with Delete Button -->
             <div class="input-group mb-3">
-                <input class="form-control" id="word_name" placeholder="Word name" type="text" value="school"/>
+                <input class="form-control" id="word_name" placeholder="Enter word" type="text" value="school"/>
                 <div class="input-group-append">
-                    <button class="btn btn-primary mb-3" onclick="getWord()" type="button">Get Word</button>
+                    <button class="btn btn-primary mb-3" onclick="getWord()" type="button">Search</button>
+                    <button class="btn btn-danger mb-3 ml-2" id="deleteButton" onclick="deleteWord()">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
                     <button class="btn btn-warning mb-3 ml-2" id="copyButton" onclick="copyResultToClipboard()">
-                        <i class="bi bi-clipboard"></i>
+                        <i class="bi bi-clipboard"></i> Copy JSON
                     </button>
                     <a class="btn btn-success mb-3 ml-2" href="/api" type="button"><i class="bi bi-info-circle"></i></a>
                 </div>
             </div>
+
+            <!-- Word Details Section (Synonyms now on the left) -->
             <div class="card mb-12">
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <div id="result"></div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="list-group" id="all-terms-list"></div>
-                        </div>
-                    </div>
+                    <h5 class="card-title">Synonyms</h5>
+                    <div id="result"></div>
+                </div>
+            </div>
+
+            <!-- Word List Section (Now on the right) -->
+            <div class="card mb-12">
+                <div class="card-body">
+                    <h5 class="card-title">Words</h5>
+                    <div class="word-list" id="all-terms-list"></div>
                 </div>
             </div>
         </div>

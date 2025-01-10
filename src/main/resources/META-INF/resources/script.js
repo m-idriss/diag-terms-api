@@ -1,115 +1,134 @@
+let jsonResult = ''; // Store the result in a variable
+
 window.onload = function () {
-  fetchTerm("GET", "/api/v1/terms", "all-terms-list");
+    fetchTerm("GET", "/api/v1/terms", "all-terms-list");
 };
 
 function getWord() {
-  const wordValue = document.getElementById("word_name").value;
-  sendWord(wordValue);
+    const wordValue = document.getElementById("word_name").value;
+    sendWord(wordValue);
 }
 
 function sendWord(word) {
-  fetchTerm("GET", "/api/v1/terms/" + word, "result");
-  setTimeout(() => {
-    fetchTerm("GET", "/api/v1/terms", "all-terms-list");
-  }, 1500);
+    fetchTerm("GET", "/api/v1/terms/" + word, "result");
+    setTimeout(() => {
+        fetchTerm("GET", "/api/v1/terms", "all-terms-list");
+    }, 1500);
 }
 
 function fetchTerm(verb, url, containerId) {
-  const xhttp = new XMLHttpRequest();
+    const xhttp = new XMLHttpRequest();
 
-  xhttp.open(verb, url, true);
-  xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.open(verb, url, true);
+    xhttp.setRequestHeader("Content-type", "application/json");
 
-  xhttp.onreadystatechange = () => {
-    if (xhttp.readyState === 4) {
-      const responseContainer = document.getElementById(containerId);
-      responseContainer.innerHTML = "";
+    xhttp.onreadystatechange = () => {
+        if (xhttp.readyState === 4) {
+            const responseContainer = document.getElementById(containerId);
+            responseContainer.innerHTML = ""; // Clear previous content
 
-      const jsonResponse = JSON.parse(xhttp.responseText);
-      const formattedJson = JSON.stringify(jsonResponse, null, 2);
-      responseContainer.innerHTML = "<pre>" + formattedJson + "</pre>";
+            const jsonResponse = JSON.parse(xhttp.responseText);
 
-      if (containerId === "all-terms-list") {
-        updateAllTermsList(jsonResponse);
-      }
-    }
-  };
+            if (containerId === "all-terms-list") {
+                updateAllTermsList(jsonResponse);
+            } else if (containerId === "result") {
+                if (jsonResponse.synonyms && jsonResponse.synonyms.length > 0) {
+                    updateWordDetails(jsonResponse);
+                } else {
+                    displayNotFoundMessage(responseContainer);
+                }
+            }
+        }
+    };
 
-  xhttp.send();
+    xhttp.send();
 }
+
+function displayNotFoundMessage(container) {
+    const message = document.createElement("div");
+    message.className = "alert alert-warning";
+    message.textContent = "No synonyms found for this word.";
+    container.appendChild(message);
+}
+
 
 // UI-related functions
 function createWordButton(term) {
-  const wordButton = document.createElement("button");
-  wordButton.className = "btn btn-primary text-left";
-  wordButton.style.marginBottom = "5px";
-  wordButton.style.width = "120px";
-  wordButton.innerHTML = `${term.id} : ${term.word}`;
-  wordButton.addEventListener("click", () => sendWord(term.word));
-  return wordButton;
-}
-
-function createDeleteButton(term) {
-  const deleteButton = document.createElement("button");
-  deleteButton.className = "btn btn-danger";
-  deleteButton.style.marginBottom = "5px";
-  deleteButton.innerHTML = `<i class="bi bi-trash"></i>`;
-  deleteButton.addEventListener("click", () => deleteTerm(term.word));
-  return deleteButton;
-}
-
-function createTermContainer(wordButton, deleteButton) {
-  const termContainer = document.createElement("div");
-  termContainer.className =
-    "term-container d-flex justify-content-between align-items-center";
-  termContainer.appendChild(wordButton);
-  termContainer.appendChild(deleteButton);
-  return termContainer;
+    const wordButton = document.createElement("button");
+    wordButton.className = "btn term-btn"; // Apply the same class as synonyms
+    wordButton.innerHTML = term.word;
+    wordButton.addEventListener("click", () => {
+        document.getElementById("word_name").value = term.word;
+        getWord();
+    });
+    return wordButton;
 }
 
 function updateAllTermsList(response) {
-  const allTermsListContainer = document.getElementById("all-terms-list");
-  allTermsListContainer.innerHTML = "";
+    const allTermsListContainer = document.getElementById("all-terms-list");
+    allTermsListContainer.innerHTML = "";
 
-  const terms = response._embedded.terms;
+    const terms = response._embedded.terms;
 
-  terms.forEach((term) => {
-    const wordButton = createWordButton(term);
-    const deleteButton = createDeleteButton(term);
-    const termContainer = createTermContainer(wordButton, deleteButton);
+    // Sort terms alphabetically by word
+    terms.sort((a, b) => a.word.localeCompare(b.word));
 
-    allTermsListContainer.appendChild(termContainer);
-  });
-}
-
-function copyResultToClipboard() {
-  const resultContainer = document.getElementById("result");
-  const textToCopy = resultContainer.textContent;
-
-  navigator.clipboard
-    .writeText(textToCopy)
-    .then(() => {
-      alert("Result copied to clipboard!");
-    })
-    .catch((err) => {
-      console.error("Unable to copy to clipboard", err);
+    terms.forEach((term) => {
+        const wordButton = createWordButton(term);
+        allTermsListContainer.appendChild(wordButton);
     });
 }
 
-function deleteTerm(termId) {
-  const url = `/api/v1/terms/${termId}`;
-  const xhttp = new XMLHttpRequest();
+function updateWordDetails(response) {
+    const resultContainer = document.getElementById("result");
+    resultContainer.innerHTML = ""; // Clear previous content
 
-  xhttp.open("DELETE", url, true);
-  xhttp.setRequestHeader("Content-type", "application/json");
+    const synonyms = response.synonyms; // Assuming synonyms is an array in the response
 
-  xhttp.onreadystatechange = () => {
-    if (xhttp.readyState === 4) {
-      setTimeout(() => {
-        fetchTerm("GET", "/api/v1/terms", "all-terms-list");
-      }, 300);
+    synonyms.forEach((synonym) => {
+        const synonymButton = document.createElement("button");
+        synonymButton.className = "btn synonym-btn";
+        synonymButton.innerHTML = synonym;
+        synonymButton.addEventListener("click", () => {
+            document.getElementById("word_name").value = synonym;
+            getWord();
+        });
+        resultContainer.appendChild(synonymButton);
+    });
+}
+
+function copyResultToClipboard() {
+    if (jsonResult) {
+        navigator.clipboard
+            .writeText(jsonResult) // Use the stored JSON result
+            .then(() => {
+                alert("Result copied to clipboard!");
+            })
+            .catch((err) => {
+                console.error("Unable to copy to clipboard", err);
+            });
+    } else {
+        alert("No JSON result to copy.");
     }
-  };
+}
 
-  xhttp.send();
+function deleteWord() {
+    const word = document.getElementById("word_name").value;
+    if (word) {
+        const url = `/api/v1/terms/${word}`;
+        const xhttp = new XMLHttpRequest();
+
+        xhttp.open("DELETE", url, true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+
+        xhttp.onreadystatechange = () => {
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                alert(`Term "${word}" deleted successfully.`);
+                document.getElementById("word_name").value = ""; // Clear input
+                fetchTerm("GET", "/api/v1/terms", "all-terms-list"); // Refresh word list
+            }
+        };
+
+        xhttp.send();
+    }
 }
