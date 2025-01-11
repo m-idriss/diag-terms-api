@@ -58,9 +58,7 @@ public class TermService {
       Log.warn("Term not found in termServiceClient for word: [" + word + "]");
       // If the term isn't found on the first attempt, retrieve it from the API
       if (retry == 0) {
-        TermRecord termRecord = new TermRecord();
-        termRecord.setWord(word);
-        termProducer.sendToKafka(word, termRecord);
+        termProducer.sendToKafka(word);
       }
 
       // Wait before the next retry
