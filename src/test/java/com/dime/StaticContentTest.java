@@ -6,7 +6,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -22,7 +21,7 @@ class StaticContentTest {
   @TestHTTPResource("3dime-logo-blue-small.png")
   URL smallLogoUrl;
 
-  @TestHTTPResource("script.js")
+  @TestHTTPResource("js/terms.js")
   URL scriptUrl;
 
   @ConfigProperty(name = "quarkus.swagger-ui.path")
@@ -66,7 +65,7 @@ class StaticContentTest {
       String contents = new String(in.readAllBytes(), StandardCharsets.UTF_8);
 
       Assertions.assertTrue(contents
-          .contains(String.format("<script src=\"%s\"></script>", new File(scriptUrl.getFile()).getName())));
+          .contains(String.format("<script src=\"%s\"></script>", scriptUrl.getFile().substring(1))));
     }
   }
 

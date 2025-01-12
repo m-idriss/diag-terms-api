@@ -2,23 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet"/>
-    <title>Terms API Demo</title>
-    <link href="styles.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="css/base.css" rel="stylesheet"/>
+    <link href="css/terms.css" rel="stylesheet"/>
+    <link href="css/gallery.css" rel="stylesheet"/>
+    <title>Terms API with Image Gallery</title>
 </head>
 <body class="bg-light">
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-9">
+
+            <!-- Logo -->
             <div class="text-center mb-4">
                 <a href="."><img alt="logo" class="img-fluid" src="./3dime-logo-blue-small.png"/></a>
             </div>
 
-            <!-- Input Section with Delete Button -->
+            <!-- Input Section -->
             <div class="input-group mb-3">
-                <input class="form-control" id="word_name" placeholder="Enter word" type="text" value="school"/>
+                <label for="word_name"></label><input class="form-control" id="word_name" placeholder="Enter word"
+                                                      type="text" value="school"/>
                 <div class="input-group-append">
                     <button class="btn btn-primary mb-3" onclick="getWord()" type="button">Search</button>
                     <button class="btn btn-danger mb-3 ml-2" id="deleteButton" onclick="deleteWord()">
@@ -31,25 +38,47 @@
                 </div>
             </div>
 
-            <!-- Word Details Section (Synonyms now on the left) -->
-            <div class="card mb-12">
-                <div class="card-body">
-                    <h5 class="card-title">Synonyms</h5>
-                    <div id="result"></div>
+            <!-- Main Layout: Image and Right Panel -->
+            <div class="d-flex align-items-start">
+                <!-- Image Section -->
+                <div class="me-4" id="image-panel">
+                    <div class="text-center" id="image-container">
+                        <img alt="" class="img-fluid mb-2" id="image" src="" style="max-width: 300px;"/>
+                        <p id="photographer"></p>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-secondary btn-sm" onclick="prevImage()">Previous</button>
+                            <button class="btn btn-secondary btn-sm" onclick="nextImage()">Next</button>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Word List Section (Now on the right) -->
-            <div class="card mb-12">
-                <div class="card-body">
-                    <h5 class="card-title">Words</h5>
-                    <div class="word-list" id="all-terms-list"></div>
+                <!-- Right Panel: Synonyms and Words -->
+                <div class="flex-grow-1" id="right-panel">
+                    <!-- Synonyms Section -->
+                    <div class="mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Synonyms</h5>
+                            <div id="result"></div>
+                        </div>
+                    </div>
+
+                    <!-- Words Section -->
+                    <div class="mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Words</h5>
+                            <div class="word-list" id="all-terms-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script src="script.js"></script>
+<script src="js/base.js"></script>
+<script src="js/gallery.js"></script>
+<script src="js/terms.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -1,12 +1,31 @@
 let jsonResult = ''; // Store the result in a variable
 
+// Ensure DOM is loaded before accessing elements
 window.onload = function () {
+    const inputField = document.getElementById("word_name");
+
+    if (inputField) {
+        const wordValue = inputField.value;
+        console.log("Input word value:", wordValue); // Debugging output
+        if (wordValue) {
+            fetchTerm("GET", `/api/v1/terms/${wordValue}`, "result");
+            fetchImage(wordValue, 1); // Fetch the first image
+            currentWord = inputField.value;
+        }
+    } else {
+        console.error('Input field with id="word_name" not found.');
+    }
+
+    // Fetch all terms to populate the word list
     fetchTerm("GET", "/api/v1/terms", "all-terms-list");
 };
 
+
 function getWord() {
     const wordValue = document.getElementById("word_name").value;
+    currentWord = wordValue;
     sendWord(wordValue);
+    fetchImage(wordValue, 1);
 }
 
 function sendWord(word) {

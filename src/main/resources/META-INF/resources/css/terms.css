@@ -145,3 +145,30 @@ input.form-control:disabled {
     border-radius: 5px;
     text-align: center;
 }
+
+#image-panel {
+    max-width: 300px;
+}
+
+#image-container img {
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    max-width: 100%;
+    height: auto;
+}
+
+#image-container p {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.word-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.card-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
