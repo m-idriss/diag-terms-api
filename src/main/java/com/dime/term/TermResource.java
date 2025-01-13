@@ -35,7 +35,7 @@ public class TermResource {
    * curl -X GET http://localhost:8080/api/v1/terms/word
    */
   @GET
-  @Path("{word: [a-zA-Z]+}")
+  @Path("/{word: [a-zA-Z]+}")
   @RestLink(rel = "self-by-word")
   @Produces({MediaType.APPLICATION_JSON, RestMediaType.APPLICATION_HAL_JSON})
   @InjectRestLinks(RestLinkType.INSTANCE)

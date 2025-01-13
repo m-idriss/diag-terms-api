@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @RegisterRestClient(configKey = "term-service")
 @ApplicationScoped
-@Path("/api/v1/terms")
+@Path("/api/v1/store/terms")
 public interface TermServiceClient {
 
   @GET
