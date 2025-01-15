@@ -6,7 +6,8 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.faulttolerance.Fallback;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import java.util.List;
@@ -22,56 +23,66 @@ public class TermService {
   @Inject
   private TermProducer termProducer;
 
-  @ConfigProperty(name = "term-service.max-retries")
-  private int maxRetries;
-
-  @ConfigProperty(name = "term-service.retry-interval-millis")
-  private long retryIntervalMillis;
-
   /**
-   * This method returns the term by its word. If the term is not found in the
-   * termServiceClient, it retrieves the term from the wordsApiService and sends
-   * it to the termProducer to be persisted in the database.
-   * The method retries to retrieve the term from the termServiceClient up to 5
-   * times with a 1 second interval between retries.
-   * If the term is not found after the retries, the method returns an empty
-   * Optional.
+   * Retrieves a term by its word.
+   * <p>
+   * The method first attempts to fetch the term from the `termServiceClient`.
+   * If the term is not found, it sends the word to `termProducer` for persistence
+   * and retries fetching the term up to 5 times with a 1-second interval between retries.
+   * If all retries fail, it falls back to returning an empty `Optional`.
+   * </p>
+   *
+   * @param word the word for which the term is to be retrieved
+   * @return an {@code Optional<TermRecord>} containing the term if found, or empty otherwise
    */
   public Optional<TermRecord> getTermByWord(String word) {
-
-    // Retry loop for retrieving TermRecord
-    for (int retry = 0; retry < maxRetries; retry++) {
-      Log.info("Retrieving term for word: [" + word + "]");
-      Log.info("Retry: " + retry);
-      try {
-        Optional<TermRecord> term = termServiceClient.getTermByWord(word);
-        if (term.isPresent()) {
-          Log.info("Term found in termServiceClient for word: [" + word + "]");
-          return term;
-        }
-      } catch (NotFoundException e) {
-        Log.info("Term not found for word: [" + word + "]");
-      } catch (RuntimeException e) {
-        Log.warn("Error retrieving term from termServiceClient", e);
+    Log.infof("Attempting to retrieve term for word: [%s]", word);
+    try {
+      Optional<TermRecord> term = termServiceClient.getTermByWord(word);
+      if (term.isPresent()) {
+        Log.infof("Term found in termServiceClient for word: [%s]", word);
+        return term;
       }
-
-      Log.warn("Term not found in termServiceClient for word: [" + word + "]");
-      // If the term isn't found on the first attempt, retrieve it from the API
-      if (retry == 0) {
-        termProducer.sendToKafka(word);
-      }
-
-      // Wait before the next retry
-      try {
-        Thread.sleep(retryIntervalMillis);
-      } catch (InterruptedException e) {
-        Log.error("Error waiting for term to be persisted", e);
-        Thread.currentThread().interrupt(); // Restore the interrupted status
-        return Optional.empty();
-      }
+    } catch (NotFoundException e) {
+      Log.warnf("Term not found in termServiceClient for word: [%s]", word);
+      termProducer.sendToKafka(word);
+      return attemptGetTermByWord(word);
     }
 
-    Log.warn("Max retries reached for retrieving term: [" + word + "]");
+    Log.warnf("Term retrieval failed for word: [%s], returning empty result.", word);
+    return Optional.empty();
+  }
+
+  /**
+   * Attempts to retrieve a term by its word, with retry and fallback mechanisms.
+   *
+   * @param word the word for which the term is to be retrieved
+   * @return an {@code Optional<TermRecord>} containing the term if found
+   * @throws NotFoundException if the term is not found after retries
+   */
+  @Retry(maxRetries = 9, delay = 60)
+  @Fallback(fallbackMethod = "getTermByWordFallback")
+  public Optional<TermRecord> attemptGetTermByWord(String word) {
+    Optional<TermRecord> term = termServiceClient.getTermByWord(word);
+
+    if (term.isPresent()) {
+      Log.infof("Term successfully retrieved from termServiceClient for word: [%s]", word);
+      return term;
+    }
+
+    Log.warnf("Retry failed: Term not found in termServiceClient for word: [%s]", word);
+    throw new NotFoundException("Term not found for word: [" + word + "]");
+  }
+
+  /**
+   * Fallback method invoked when retries are exhausted or an error occurs.
+   *
+   * @param word the word for which the term retrieval failed
+   * @return an empty {@code Optional<TermRecord>}
+   */
+  @SuppressWarnings("unused")
+  private Optional<TermRecord> getTermByWordFallback(String word) {
+    Log.warnf("Fallback triggered for word: [%s]. Returning empty result.", word);
     return Optional.empty();
   }
 

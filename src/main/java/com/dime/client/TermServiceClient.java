@@ -49,7 +49,8 @@ public interface TermServiceClient {
   @ClientExceptionMapper
   static RuntimeException toException(Response response) {
     if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
-      Log.warn("Term not found in term-service");
+      var attributes = response.readEntity(Map.class);
+      Log.warn("Response from store service : 404 - " + attributes.get("message"));
       return new NotFoundException("Term not found in term-service");
     }
     return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus(), "message", response.readEntity(String.class)));
