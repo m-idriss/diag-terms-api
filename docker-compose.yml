@@ -12,6 +12,7 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       TERMS_SERVICE_URL: http://diag-terms-store:8083
       PEXELS_API_KEY: ${PEXELS_API_KEY}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT}
       PORT: 8081
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8081/api/health" ]
