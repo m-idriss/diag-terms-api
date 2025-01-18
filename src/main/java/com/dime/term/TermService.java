@@ -44,12 +44,12 @@ public class TermService {
         return term;
       }
     } catch (NotFoundException e) {
-      Log.warnf("Term not found in termServiceClient for word: [%s]", word);
+      Log.infof("Term not found in termServiceClient for word: [%s]", word);
       termProducer.sendToKafka(word);
       return attemptGetTermByWord(word);
     }
 
-    Log.warnf("Term retrieval failed for word: [%s], returning empty result.", word);
+    Log.infof("Term retrieval failed for word: [%s], returning empty result.", word);
     return Optional.empty();
   }
 
@@ -70,7 +70,7 @@ public class TermService {
       return term;
     }
 
-    Log.warnf("Retry failed: Term not found in termServiceClient for word: [%s]", word);
+    Log.infof("Retry failed: Term not found in termServiceClient for word: [%s]", word);
     throw new NotFoundException("Term not found for word: [" + word + "]");
   }
 
@@ -82,7 +82,7 @@ public class TermService {
    */
   @SuppressWarnings("unused")
   private Optional<TermRecord> getTermByWordFallback(String word) {
-    Log.warnf("Fallback triggered for word: [%s]. Returning empty result.", word);
+    Log.infof("Fallback triggered for word: [%s]. Returning empty result.", word);
     return Optional.empty();
   }
 

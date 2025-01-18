@@ -28,7 +28,7 @@ public class MediaResource {
   @ClientExceptionMapper
   static RuntimeException toException(Response response) {
     if (response.getStatus() == Response.Status.NOT_FOUND.getStatusCode()) {
-      Log.warn("Photo not found in media-service");
+      Log.info("Photo not found in media-service");
       return new NotFoundException("Photo not found in media-service");
     }
     return GenericError.FAILED_DEPENDENCY.exWithArguments(Map.of("code", response.getStatus(), "message", response.readEntity(String.class)));
